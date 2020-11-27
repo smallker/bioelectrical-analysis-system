@@ -18,11 +18,11 @@ db.connect((err) => {
 })
 app.use(cors())
 app.use(bodyParser.json())
-// app.use(express.static(path.join(__dirname, '../web/build/web')))
-// app.use(express.urlencoded({ extended: true }))
-// app.get('/', (req, res) => {
-//     res.render('index')
-// })
+app.use(express.static(path.join(__dirname, '../web/build/web')))
+app.use(express.urlencoded({ extended: true }))
+app.get('/', (req, res) => {
+    res.render('index')
+})
 
 app.post('/getperson', (req, res) => {
     let no_pasien = req.body.no_pasien
@@ -40,14 +40,21 @@ app.post('/getperson', (req, res) => {
 app.post('/ecw', (req,res) => {
     let no_pasien = req.body.no_pasien
     let ecw = req.body.ecw
-    db.query(`update pasien set ecw=${ecw} where no_pasien = ${no_pasien}`)
+    let modified = Date.now()
+    db.query(`update pasien set ecw=${ecw}, modified=${modified} where no_pasien = ${no_pasien}`)
     res.send(`ECW : ${ecw}`)
 })
 app.post('/tbw', (req,res) => {
     let no_pasien = req.body.no_pasien
     let tbw = req.body.tbw
-    db.query(`update pasien set tbw=${tbw} where no_pasien = ${no_pasien}`)
+    let modified = Date.now()
+    db.query(`update pasien set tbw=${tbw}, modified=${modified} where no_pasien = ${no_pasien}`)
     res.send(`TBW : ${tbw}`)
+})
+app.get('/last', (req,res) => {
+    db.query(`select * from pasien order by modified desc limit 1`,(err, rows, field) => {
+        res.send(rows[0])
+    })
 })
 // cron.schedule('* * * * * *', () => {
 //     var now = Date.now()
